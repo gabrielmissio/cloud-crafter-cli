@@ -24,7 +24,7 @@ To create a new project using a template, run the following command:
 cloud-crafter-cli create <template-name> <project-name>
 ```
 
-or use the alias `ctc`
+or use the alias `ccc`
 
 ```bash
 ccc create <template-name> <project-name>
