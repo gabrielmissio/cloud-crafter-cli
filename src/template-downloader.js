@@ -1,3 +1,4 @@
+const fetch = require('cross-fetch')
 const fs = require('fs-extra')
 const path = require('path')
 
@@ -8,6 +9,11 @@ async function downloadTemplate (templatePath, targetPath) {
   const url = `https://api.github.com/repos/${owner}/${repo}/contents/templates/${templatePath}`
   const res = await fetch(url)
   const data = await res.json()
+
+  if (res.status !== 200) {
+    throw new Error(`Unexpected response from GitHub API: ${JSON.stringify(data)}`)
+  }
+
   if (Array.isArray(data)) {
     // If the response is an array, it means we received a directory
     await Promise.all(data.map(async (item) => {

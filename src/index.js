@@ -22,31 +22,36 @@ program
     const newProjectDir = `./${targetPath}`
     console.log(`Creating new project from template '${templateName}' in '${newProjectDir}'`)
 
-    downloadTemplate(templateName, newProjectDir).then(() => {
-      if (templateName.startsWith('serverless/')) {
-        const rl = Readline.createInterface({
-          input: process.stdin,
-          output: process.stdout
-        })
+    downloadTemplate(templateName, newProjectDir)
+      .then(() => {
+        if (templateName.startsWith('serverless/')) {
+          const rl = Readline.createInterface({
+            input: process.stdin,
+            output: process.stdout
+          })
 
-        // Prompt the user to confirm running npm install
-        rl.question('Do you want to install dependencies? (y/n) ', (answer) => {
-          rl.close()
-          if (answer === 'y' || answer === 'Y') {
-            const npmInstall = exec('npm install', { cwd: newProjectDir })
-            npmInstall.stdout.pipe(process.stdout)
+          // Prompt the user to confirm running npm install
+          rl.question('Do you want to install dependencies? (y/n) ', (answer) => {
+            rl.close()
+            if (answer === 'y' || answer === 'Y') {
+              const npmInstall = exec('npm install', { cwd: newProjectDir })
+              npmInstall.stdout.pipe(process.stdout)
 
-            npmInstall.on('close', () => {
-              console.log('Project created successfully!')
-            })
-          } else {
-            console.log('Project created successfully! To install dependencies, run \'npm install\' in the project directory.')
-          }
-        })
-      } else {
-        console.log('Project created successfully!')
-      }
-    })
+              npmInstall.on('close', () => {
+                console.log('Project created successfully!')
+              })
+            } else {
+              console.log('Project created successfully! To install dependencies, run \'npm install\' in the project directory.')
+            }
+          })
+        } else {
+          console.log('Project created successfully!')
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+        console.log('Project creation failed!')
+      })
   })
 
 program.on('command:*', () => {
