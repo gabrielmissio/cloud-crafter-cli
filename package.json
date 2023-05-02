@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "CloudCrafter CLI is a command-line interface tool that provides templates for common cloud resources to help you get started quickly.",
   "main": "src/index.js",
+  "bin": {
+    "cloud-crafter-cli": "src/index.js",
+    "ccc": "src/index.js"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
     "lint": "npx eslint",
     "prepare": "husky install"
   },
