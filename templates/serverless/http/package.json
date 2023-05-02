@@ -1,0 +1,17 @@
+{
+  "name": "serverless-http-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/handler.js",
+  "scripts": {
+    "start": "serverless offline start",
+    "deploy": "serverless deploy --verbose"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "dotenv": "^16.0.3",
+    "serverless": "^3.30.1",
+    "serverless-offline": "^12.0.4"
+  }
+}

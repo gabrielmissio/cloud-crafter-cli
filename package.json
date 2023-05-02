@@ -1,0 +1,47 @@
+{
+  "name": "cloud-crafter-cli",
+  "version": "1.0.0",
+  "description": "CloudCrafter CLI is a command-line interface tool that provides templates for common cloud resources to help you get started quickly.",
+  "main": "src/index.js",
+  "bin": {
+    "cloud-crafter-cli": "src/index.js",
+    "ccc": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "lint": "npx eslint",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gabrielmissio/cloud-crafter-cli.git"
+  },
+  "keywords": [
+    "cli",
+    "cloud",
+    "serverless",
+    "serverless-framework",
+    "cloudformation",
+    "infra-as-code"
+  ],
+  "author": "Gabriel Missio",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/gabrielmissio/cloud-crafter-cli/issues"
+  },
+  "homepage": "https://github.com/gabrielmissio/cloud-crafter-cli#readme",
+  "devDependencies": {
+    "eslint": "^8.39.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^15.7.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.2"
+  },
+  "dependencies": {
+    "commander": "^10.0.1",
+    "cross-fetch": "^3.1.5",
+    "fs-extra": "^11.1.1"
+  }
+}
