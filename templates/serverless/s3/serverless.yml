@@ -1,0 +1,47 @@
+service: s3-demo
+
+# Load environment variable from ".env"
+useDotenv: true
+
+# Custom variables (accessed via ${self:custom.params.VARIABLE_NAME})
+custom:
+  params:
+    MEDIA_BUCKET_NAME: ${env:MEDIA_BUCKET_NAME}
+
+# Which files should or should not be packed in the lambda function
+package:
+  patterns:
+    - '!./**' # Exclude all files
+    - './src/**' # Include src
+    - './node_modules/**' # Include node_modules
+    - '!./node_modules/aws-sdk/**' # Exclude AWS SDK V2 from being packaged (aws-sdk is included natively in lambda)
+    - '!./node_modules/@aws-sdk/**' # Exclude AWS SDK V3 from being packaged (@aws-sdk is included natively in lambda)
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  environment: # Environment variables
+    REGION: ${opt:region, 'us-east-1'}
+    MEDIA_BUCKET_NAME: ${self:custom.params.MEDIA_BUCKET_NAME}
+
+functions:
+  main:
+    handler: src/handler.handler
+    timeout: 30 # Timeout in seconds
+    events:
+      - s3: # Trigger the lambda function when a new image is uploaded to media bucket
+          bucket: ${self:custom.params.MEDIA_BUCKET_NAME}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: imgs/
+            - suffix: .jpg
+          existing: true
+      - s3: # Trigger the lambda function when a new image is deleted from media bucket
+          bucket: ${self:custom.params.MEDIA_BUCKET_NAME}
+          event: s3:ObjectRemoved:*
+          rules:
+            - prefix: imgs/
+            - suffix: .jpg
+          existing: true
