@@ -4,7 +4,8 @@ const ALLOWED_TEMPLATES = [
   'cloudformation/dynamodb-table',
   'cloudformation/s3-public-read',
   'cloudformation/s3-static-website',
-  'utils/fast-setup'
+  'utils/fast-setup',
+  'utils/openai'
 ]
 
 function isTemplateAllowed (template) {

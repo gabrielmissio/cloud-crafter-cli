@@ -52,6 +52,8 @@ ccc create serverless/http my-new-project
 ### Utils
 
  - utils/fast-setup
+ - utils/openai
+ 
 ## Contributing
 
 If you'd like to contribute to CloudCrafter CLI, please fork the repository and create a pull request.
