@@ -24,7 +24,7 @@ program
 
     downloadTemplate(templateName, newProjectDir)
       .then(() => {
-        if (templateName.startsWith('serverless/')) {
+        if (templateName.startsWith('serverless/') || templateName.startsWith('utils/')) {
           const rl = Readline.createInterface({
             input: process.stdin,
             output: process.stdout
