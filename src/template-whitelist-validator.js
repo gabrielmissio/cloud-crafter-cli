@@ -3,7 +3,8 @@ const ALLOWED_TEMPLATES = [
   'serverless/http',
   'cloudformation/dynamodb-table',
   'cloudformation/s3-public-read',
-  'cloudformation/s3-static-website'
+  'cloudformation/s3-static-website',
+  'utils/fast-setup'
 ]
 
 function isTemplateAllowed (template) {
