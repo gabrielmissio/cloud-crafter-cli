@@ -49,9 +49,14 @@ ccc create serverless/http my-new-project
 - cloudformation/s3-public-read
 - cloudformation/s3-static-website
 
+### Utils
+
+ - utils/fast-setup
+ - utils/openai
+ 
 ## Contributing
 
-If you'd like to contribute to Cloud Templates CLI, please fork the repository and create a pull request.
+If you'd like to contribute to CloudCrafter CLI, please fork the repository and create a pull request.
 
 ## License
 
