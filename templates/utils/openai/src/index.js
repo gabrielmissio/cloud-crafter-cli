@@ -3,17 +3,14 @@ require('dotenv').config()
 const openai = require('./openai')
 
 async function demo () {
-  const { data: models } = await openai.listModels()
-  console.log('Models', models)
-
-  const { data: completion } = await openai.createCompletion({
+  const { data } = await openai.createChatCompletion({
     model: 'gpt-3.5-turbo',
     messages: [{
       role: 'user',
-      content: 'Say this is a test!'
+      content: 'Hello, World!'
     }]
   })
-  console.log('Completion', completion)
+  console.log('Chat Completion:', JSON.stringify(data))
 }
 
 demo().catch((error) => {
