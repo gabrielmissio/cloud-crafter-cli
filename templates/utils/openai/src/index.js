@@ -1,8 +1,10 @@
+// Load environment variables from .env file
 require('dotenv').config()
 
 const openai = require('./openai')
 
 async function demo () {
+  // See https://platform.openai.com/docs/api-reference/chat for API documentation
   const { data } = await openai.createChatCompletion({
     model: 'gpt-3.5-turbo',
     messages: [{
@@ -10,7 +12,7 @@ async function demo () {
       content: 'Hello, World!'
     }]
   })
-  console.log('Chat Completion:', JSON.stringify(data))
+  console.log('Result:', JSON.stringify(data))
 }
 
 demo().catch((error) => {
