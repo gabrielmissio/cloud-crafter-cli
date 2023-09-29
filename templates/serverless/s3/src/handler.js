@@ -1,5 +1,10 @@
-exports.handler = async (event, context) => ({
-  success: true,
-  event,
-  context
-})
+exports.handler = async (event, context) => {
+  console.log(JSON.stringify({
+    event,
+    context
+  }))
+
+  return {
+    success: true
+  }
+}
