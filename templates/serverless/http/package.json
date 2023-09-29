@@ -5,13 +5,13 @@
   "main": "src/handler.js",
   "scripts": {
     "start": "serverless offline start",
+    "predeploy": "npm i --omit=dev",
     "deploy": "serverless deploy --verbose"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "dotenv": "^16.0.3",
-    "serverless": "^3.30.1",
-    "serverless-offline": "^12.0.4"
+    "serverless": "^3.35.2",
+    "serverless-offline": "^13.1.1"
   }
 }
