@@ -1,5 +1,5 @@
-# Ref: https://www.serverless.com/framework/docs/providers/aws/events/http-api
-service: http-demo
+# Ref: https://www.serverless.com/framework/docs/providers/aws/events/apigateway
+service: rest-demo
 
 # Allows you to run the application on localhost
 plugins:
@@ -39,6 +39,6 @@ functions:
     handler: src/handler.handler
     timeout: 7 # Timeout in seconds
     events:
-      - httpApi:
+      - http:
           method: GET
           path: '/hello'

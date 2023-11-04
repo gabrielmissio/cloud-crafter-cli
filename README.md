@@ -40,8 +40,9 @@ ccc create serverless/http my-new-project
 
 ### Serverless Framework
 
-- serverless/http
-- serverless/s3
+- serverless/http (API Gateway V2)
+- serverless/rest (API Gateway V1)
+- serverless/s3   (S3 trigger)
 
 ### CloudFormation
 

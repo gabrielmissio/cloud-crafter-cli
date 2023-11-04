@@ -1,5 +1,5 @@
 {
-  "name": "serverless-http-demo",
+  "name": "serverless-rest-demo",
   "version": "1.0.0",
   "description": "",
   "main": "src/handler.js",
