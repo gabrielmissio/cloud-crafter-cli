@@ -1,0 +1,17 @@
+{
+  "name": "serverless-rest-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/handler.js",
+  "scripts": {
+    "start": "serverless offline start",
+    "predeploy": "npm i --omit=dev",
+    "deploy": "serverless deploy --verbose"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless": "^3.35.2",
+    "serverless-offline": "^13.1.1"
+  }
+}

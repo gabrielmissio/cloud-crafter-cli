@@ -1,0 +1,44 @@
+# Ref: https://www.serverless.com/framework/docs/providers/aws/events/apigateway
+service: rest-demo
+
+# Allows you to run the application on localhost
+plugins:
+  - serverless-offline
+
+# Load environment variable from ".env" file
+useDotenv: true
+
+# Custom variables (accessed via ${self:custom.params.VARIABLE_NAME})
+custom:
+  params:
+    # Serverless always loads the leftmost defined value
+    # In this case, when param:VARIABLE_DEMO_1 is not defined, it will load env:VARIABLE_DEMO_1
+    VARIABLE_DEMO_1: ${param:VARIABLE_DEMO_1, env:VARIABLE_DEMO_1}
+    VARIABLE_DEMO_2: ${param:VARIABLE_DEMO_2, env:VARIABLE_DEMO_2}
+
+# Which files should or should not be packed in the lambda function
+package:
+  patterns:
+    - '!./**' # Exclude all files
+    - './src/**' # Include src
+    - './node_modules/**' # Include node_modules
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  environment:
+    # Environment variables that will be loaded into the lambda function
+    REGION: ${opt:region, 'us-east-1'}
+    VARIABLE_DEMO_1: ${self:custom.params.VARIABLE_DEMO_1}
+    VARIABLE_DEMO_2: ${self:custom.params.VARIABLE_DEMO_2}
+
+functions:
+  main:
+    handler: src/handler.handler
+    timeout: 7 # Timeout in seconds
+    events:
+      - http:
+          method: GET
+          path: '/hello'
