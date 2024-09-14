@@ -22,6 +22,29 @@ export DEPLOYMENT_BUCKET_NAME="general-purpose-deployment-bucket"
 sam local start-api --template-file sam.yml
 ```
 
+### Invoke Alert Topic Consumer
+
+```bash
+sam local invoke AlertTopicConsumerLambdaFunction \
+    --template-file sam.yml --event alert-topic-consumer/events/demo.json
+```
+
+### Invoke Main Queue Consumer
+
+```bash
+sam local invoke MainQueueConsumerLambdaFunction \
+    --template-file sam.yml --event main-queue-consumer/events/demo.json
+```
+
+### Invoke Error Queue Consumer
+
+```bash
+sam local invoke ErrorQueueConsumerLambdaFunction \
+    --template-file sam.yml \
+    --env-vars local-env.json \
+    --event error-queue-consumer/events/demo.json
+```
+
 ## Deploy
 
 ```bash

@@ -50,7 +50,7 @@ Resources:
       TopicName: !Sub ${AppName}-AlertTopic-${StageName}
       DisplayName: !Sub ${AppName}-AlertTopic-${StageName}
 
-  QueueProducerLambdaFunction:
+  MainQueueProducerLambdaFunction:
     Type: AWS::Serverless::Function
     Properties:
       Handler: index.handler
@@ -84,6 +84,71 @@ Resources:
             Method: POST
             ApiId: !Ref HttpApi
 
+  MainQueueConsumerLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs18.x
+      CodeUri: ./main-queue-consumer/src
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          STAGE: !Ref StageName
+          MAIN_QUEUE_URL: !GetAtt MainQueue.QueueUrl
+          ERROR_QUEUE_URL: !GetAtt ErrorQueue.QueueUrl
+          DEAD_LETTER_QUEUE_URL: !GetAtt DeadLetterQueue.QueueUrl
+          ALERT_TOPIC_ARN: !GetAtt AlertsSNSTopic.TopicArn
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: 
+                - "sqs:SendMessage"
+              Resource:
+                - !GetAtt MainQueue.Arn
+                - !GetAtt ErrorQueue.Arn
+                - !GetAtt DeadLetterQueue.Arn
+
+  ErrorQueueConsumerLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs18.x
+      CodeUri: ./error-queue-consumer/src
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          STAGE: !Ref StageName
+          DEAD_LETTER_QUEUE_URL: !GetAtt DeadLetterQueue.QueueUrl
+          ALERT_TOPIC_ARN: !GetAtt AlertsSNSTopic.TopicArn
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: 
+                - "sqs:SendMessage"
+              Resource:
+                - !GetAtt DeadLetterQueue.Arn
+
+  AlertTopicConsumerLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs18.x
+      CodeUri: ./alert-topic-consumer/src
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          STAGE: !Ref StageName
+          ALERT_TOPIC_ARN: !GetAtt AlertsSNSTopic.TopicArn
+      Policies:
+        - AWSLambdaBasicExecutionRole
+
 Outputs:
   ApiGatewayQueueProducerInvokeURL:
     Description: "Invoke URL for the API Gateway"
@@ -91,8 +156,8 @@ Outputs:
     Export:
       Name: !Sub '${AppName}-ApiGatewayQueueProducerInvokeURL-${StageName}'
 
-  QueueProducerLambdaFunctionArn:
+  MainQueueProducerLambdaFunctionArn:
     Description: "ARN of the deployed Lambda function"
-    Value: !GetAtt QueueProducerLambdaFunction.Arn
+    Value: !GetAtt MainQueueProducerLambdaFunction.Arn
     Export:
-      Name: !Sub '${AppName}-QueueProducerLambdaFunctionArn-${StageName}'
+      Name: !Sub '${AppName}-MainQueueProducerLambdaFunctionArn-${StageName}'
