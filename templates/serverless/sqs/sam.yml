@@ -104,13 +104,6 @@ Resources:
         - AWSLambdaBasicExecutionRole
         - Version: '2012-10-17'
           Statement:
-            # - Effect: Allow
-            #   Action:
-            #     - "sqs:DeleteMessage"
-            #     - "sqs:ReceiveMessage"
-            #     - "sqs:GetQueueAttributesMessage"
-            #   Resource:
-            #     - !GetAtt MainQueue.Arn
             - Effect: Allow
               Action: 
                 - "sqs:SendMessage"
@@ -127,6 +120,10 @@ Resources:
           Type: SQS
           Properties:
             Queue: !GetAtt MainQueue.Arn
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+            ScalingConfig:
+              MaximumConcurrency: 10
 
   ErrorQueueConsumerLambdaFunction:
     Type: AWS::Serverless::Function
@@ -161,6 +158,10 @@ Resources:
           Type: SQS
           Properties:
             Queue: !GetAtt ErrorQueue.Arn
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+            ScalingConfig:
+              MaximumConcurrency: 5
 
   AlertTopicConsumerLambdaFunction:
     Type: AWS::Serverless::Function
