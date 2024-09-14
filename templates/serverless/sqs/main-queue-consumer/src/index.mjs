@@ -1,4 +1,5 @@
 import { sendMessage } from "./infra/queue-api.mjs"
+import { batchFailureAlert } from "./infra/notification-api.mjs"
 import { PartialBatchFailureError } from "./errors/partial-batch-failure-error.mjs"
 
 export async function handler(event, context) {
@@ -10,6 +11,15 @@ export async function handler(event, context) {
         const batchItemFailures = results
             .filter(result => result.status === "rejected")
             .map(result => ({ itemIdentifier: result.status === "rejected" ? result.reason.messageId : undefined }))
+
+        if (batchItemFailures.length > 0) {
+            const batchFailureAlertResult = await batchFailureAlert({
+                context,
+                totalRecords: event.Records.length,
+                failedRecords: batchFailureAlert.length
+            }).catch((error) => ({ error: "Unable to send batchFailureAlert", reason: error }))
+            console.info("index", "handler", { batchFailureAlertResult })
+        }
 
         const result = { batchItemFailures }
         console.info("index", "handler", JSON.stringify(result))
@@ -55,40 +65,40 @@ async function recordHandler(record) {
     }
 }
 
-async function sendToDlq(record) {
-    try {
-        const { SQS_DLQ } = process.env
-
-        if (typeof SQS_DLQ !== "string") {
-            throw new Error("SQS_DLQ is not defined")
-        }
-
-        // NOTE: we may send additional context to the DLQ to help with error handling
-        return await sendMessage({
-            queueUrl: SQS_DLQ,
-            body: record.body,
-        })
-    } catch (error) {
-        console.error("index", "sendToDlq", error.message, error.stack, error.payload)
-        throw new PartialBatchFailureError(record.messageId, error)
-    }
-}
-
 async function sendToErrorQueue(record) {
     try {
-        const { SQS_ERROR_HANDLER_QUEUE } = process.env
+        const { ERROR_QUEUE_URL } = process.env
 
-        if (typeof SQS_ERROR_HANDLER_QUEUE !== "string") {
-            throw new Error("SQS_ERROR_HANDLER_QUEUE is not defined")
+        if (typeof ERROR_QUEUE_URL !== "string") {
+            throw new Error("ERROR_QUEUE_URL is not defined")
         }
 
         // NOTE: we may send additional context to the DLQ to help with error handling
         return await sendMessage({
-            queueUrl: SQS_ERROR_HANDLER_QUEUE,
+            queueUrl: ERROR_QUEUE_URL,
             body: record.body,
         })
     } catch (error) {
         console.error("index", "sendToErrorQueue", error.message, error.stack, error.payload)
+        throw new PartialBatchFailureError(record.messageId, error)
+    }
+}
+
+async function sendToDlq(record) {
+    try {
+        const { DEAD_LETTER_QUEUE_URL } = process.env
+
+        if (typeof DEAD_LETTER_QUEUE_URL !== "string") {
+            throw new Error("DEAD_LETTER_QUEUE_URL is not defined")
+        }
+
+        // NOTE: we may send additional context to the DLQ to help with error handling
+        return await sendMessage({
+            queueUrl: DEAD_LETTER_QUEUE_URL,
+            body: record.body,
+        })
+    } catch (error) {
+        console.error("index", "sendToDlq", error.message, error.stack, error.payload)
         throw new PartialBatchFailureError(record.messageId, error)
     }
 }

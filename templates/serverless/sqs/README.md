@@ -22,6 +22,15 @@ export DEPLOYMENT_BUCKET_NAME="general-purpose-deployment-bucket"
 sam local start-api --template-file sam.yml
 ```
 
+or just invoke Main Queue Producer
+
+```bash
+sam local invoke MainQueueProducerLambdaFunction \
+    --template-file sam.yml \
+    --env-vars env.dev.json \
+    --event main-queue-producer/events/demo.json
+```
+
 ### Invoke Alert Topic Consumer
 
 ```bash
@@ -33,7 +42,9 @@ sam local invoke AlertTopicConsumerLambdaFunction \
 
 ```bash
 sam local invoke MainQueueConsumerLambdaFunction \
-    --template-file sam.yml --event main-queue-consumer/events/demo.json
+    --template-file sam.yml \
+    --env-vars env.${STAGE}.json \
+    --event main-queue-consumer/events/demo.json
 ```
 
 ### Invoke Error Queue Consumer
@@ -41,27 +52,23 @@ sam local invoke MainQueueConsumerLambdaFunction \
 ```bash
 sam local invoke ErrorQueueConsumerLambdaFunction \
     --template-file sam.yml \
-    --env-vars local-env.json \
+    --env-vars env.${STAGE}.json \
     --event error-queue-consumer/events/demo.json
 ```
 
 ## Deploy
 
 ```bash
-mkdir -p .serverless
 sam package --template-file sam.yml \
-    --output-template-file .serverless/sam-package.yml \
     --s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
     --s3-prefix sam/${APP_NAME}/${STAGE}/sam-package
 ```
 
 ```bash
-npm i --omit=dev
-cd ../../tools/stacks/backend
-sam deploy --template-file lambda-functions.yml \
+sam deploy --template-file sam.yml \
     --stack-name ${APP_NAME}-Lambdas-${STAGE} \
     --s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
-    --s3-prefix sam/${APP_NAME}/${STAGE}/lambda-functions \
+    --s3-prefix sam/${APP_NAME}/${STAGE}/sam-package \
     --capabilities CAPABILITY_IAM \
     --parameter-overrides AppName=${APP_NAME} StageName=${STAGE}
 ```
