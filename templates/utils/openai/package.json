@@ -10,7 +10,7 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "openai": "^3.2.1"
+    "openai": "^4.61.0"
   },
   "devDependencies": {
     "dotenv": "^16.0.3"
