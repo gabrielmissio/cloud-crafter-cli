@@ -1,8 +1,8 @@
 import { sendMessage } from "./infra/queue-api.mjs"
 
-export async function handler(event) {
+export async function handler(event, context) {
     try {
-        console.log('envs:', process.env)
+        console.info({ event, context, envs: process.env })
         const body = JSON.parse(event.body)
 
         const { value, errors } = validateRequest(body)
@@ -24,7 +24,7 @@ export async function handler(event) {
         return makeResponse({ success: true }, 200)
     } catch (error) {
         console.error(error)
-        return makeResponse(error, 500)
+        return makeResponse({ error: error.message }, 500)
     }
 }
 

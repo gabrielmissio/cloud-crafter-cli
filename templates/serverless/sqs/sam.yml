@@ -123,7 +123,7 @@ Resources:
             FunctionResponseTypes:
               - ReportBatchItemFailures
             ScalingConfig:
-              MaximumConcurrency: 10
+              MaximumConcurrency: 2
 
   ErrorQueueConsumerLambdaFunction:
     Type: AWS::Serverless::Function
@@ -161,7 +161,7 @@ Resources:
             FunctionResponseTypes:
               - ReportBatchItemFailures
             ScalingConfig:
-              MaximumConcurrency: 5
+              MaximumConcurrency: 2
 
   AlertTopicConsumerLambdaFunction:
     Type: AWS::Serverless::Function
@@ -186,14 +186,32 @@ Resources:
   # TODO: Add ErrorQueue and DeadLetterQueue alarms
 
 Outputs:
-  ApiGatewayQueueProducerInvokeURL:
+  ApiGatewayInvokeURL:
     Description: "Invoke URL for the API Gateway"
-    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/queue-producer'
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}'
     Export:
-      Name: !Sub '${AppName}-ApiGatewayQueueProducerInvokeURL-${StageName}'
+      Name: !Sub '${AppName}-ApiGatewayInvokeURL-${StageName}'
 
   MainQueueProducerLambdaFunctionArn:
     Description: "ARN of the deployed Lambda function"
     Value: !GetAtt MainQueueProducerLambdaFunction.Arn
     Export:
       Name: !Sub '${AppName}-MainQueueProducerLambdaFunctionArn-${StageName}'
+
+  MainQueueConsumerLambdaFunctionArn:
+    Description: "ARN of the deployed Lambda function"
+    Value: !GetAtt MainQueueConsumerLambdaFunction.Arn
+    Export:
+      Name: !Sub '${AppName}-MainQueueConsumerLambdaFunctionArn-${StageName}'
+
+  ErrorQueueConsumerLambdaFunctionArn:
+    Description: "ARN of the deployed Lambda function"
+    Value: !GetAtt ErrorQueueConsumerLambdaFunction.Arn
+    Export:
+      Name: !Sub '${AppName}-ErrorQueueConsumerLambdaFunctionArn-${StageName}'
+
+  AlertTopicConsumerLambdaFunctionArn:
+    Description: "ARN of the deployed Lambda function"
+    Value: !GetAtt AlertTopicConsumerLambdaFunction.Arn
+    Export:
+      Name: !Sub '${AppName}-AlertTopicConsumerLambdaFunctionArn-${StageName}'

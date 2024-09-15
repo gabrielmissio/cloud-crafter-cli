@@ -66,9 +66,18 @@ sam package --template-file sam.yml \
 
 ```bash
 sam deploy --template-file sam.yml \
-    --stack-name ${APP_NAME}-Lambdas-${STAGE} \
+    --stack-name ${APP_NAME}-Stack-${STAGE} \
     --s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
     --s3-prefix sam/${APP_NAME}/${STAGE}/sam-package \
     --capabilities CAPABILITY_IAM \
     --parameter-overrides AppName=${APP_NAME} StageName=${STAGE}
+```
+
+## Clean up
+
+```bash
+sam delete \
+    --stack-name ${APP_NAME}-Stack-${STAGE} \
+    --s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
+    --s3-prefix sam/${APP_NAME}/${STAGE}/sam-package \
 ```

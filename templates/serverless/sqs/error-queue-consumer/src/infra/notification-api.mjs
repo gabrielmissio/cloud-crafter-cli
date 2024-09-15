@@ -14,7 +14,9 @@ export async function batchFailureAlert ({ context, totalRecords, failedRecords 
   const isTotalFailure = totalRecords === failedRecords
   
   const message = JSON.stringify({
-    title: `${process.env.APP_NAME} ${process.env.AWS_LAMBDA_FUNCTION_NAME}`,
+    title: `Batch Failure Alert`,
+    from: process.env.AWS_LAMBDA_FUNCTION_NAME,
+    stage: process.env.STAGE,
     type: isTotalFailure ? 'error' : 'warning',
     subtitle: isTotalFailure ? 'TOTAL BATCH FAILURE' : 'PARTIAL BATCH FAILURE',
     message: `${failedRecords} of ${totalRecords} records failed to process`,

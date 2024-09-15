@@ -1,10 +1,10 @@
 import { sendMessage } from "./infra/queue-api.mjs"
-import { batchFailureAlert } from "./infra/notification-api.mjs"
-import { NonRetryableError } from "./errors/non-retryable-error.mjs"
 import { RetryableError } from "./errors/retryable-error.mjs"
+import { batchFailureAlert } from "./infra/notification-api.mjs"
 
 export async function handler(event, context) {
     try {
+        console.info("index", "handler", JSON.stringify({ event, context, envs: process.env }))
         const recordPromises = event.Records.map(recordHandler)
         const results = await Promise.allSettled(recordPromises)
         console.info("index", "handler", JSON.stringify(results))
@@ -40,6 +40,7 @@ async function recordHandler(record) {
         const body = JSON.parse(record.body)
 
         const options = {
+            INVALID_REQUEST_ERROR: 'InvalidRequest',
             NON_RETRYABLE_ERROR: 'NonRetryable',
             RETRYABLE_ERROR: 'Retryable',
             FATAL_ERROR: 'Fatal',
@@ -53,20 +54,21 @@ async function recordHandler(record) {
                 return true
             case options.FATAL_ERROR:
                 await sendToDlq(record)
-                throw new NonRetryableError(record.messageId, "Any Fatal Error")
-            case options.RETRYABLE_ERROR:
-                throw new RetryableError(record.messageId, "Any Retryable Error")
+                return Promise.reject(new Error("Any Fatal Error"))
             case options.NON_RETRYABLE_ERROR:
                 await sendToErrorQueue(record)
-                throw new NonRetryableError(record.messageId, "Any Fatal Error")
-            default:
-                // treat as invalid record / change based on your use case
+                return Promise.reject(new Error("Non Retryable Error"))
+            case options.INVALID_REQUEST_ERROR:
                 await sendToDlq(record)
-                throw new RetryableError(record.messageId, "Unknow Error")
+                return Promise.reject(new Error("Invalid Request Error"))
+            case options.RETRYABLE_ERROR:
+                return Promise.reject(new RetryableError(record.messageId, "Any Retryable Error"))
+            default:
+                return Promise.reject(new RetryableError(record.messageId, "Unknow Error"))
         }
     } catch (error) {
         console.error("index", "recordHandler", error.message, error.stack, error.payload)
-        throw new PartialBatchFailureError(record.messageId, error)
+        throw new RetryableError(record.messageId, error.message)
     }
 }
 
@@ -85,7 +87,7 @@ async function sendToErrorQueue(record) {
         })
     } catch (error) {
         console.error("index", "sendToErrorQueue", error.message, error.stack, error.payload)
-        throw new RetryableError(record.messageId, error)
+        throw new RetryableError(record.messageId, error.message)
     }
 }
 
@@ -104,6 +106,6 @@ async function sendToDlq(record) {
         })
     } catch (error) {
         console.error("index", "sendToDlq", error.message, error.stack, error.payload)
-        throw new PartialBatchFailureError(record.messageId, error)
+        throw new RetryableError(record.messageId, error.message)
     }
 }
