@@ -11,8 +11,5 @@
     "deploy": "serverless deploy --verbose"
   },
   "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "serverless": "^3.35.2"
-  }
+  "license": "MIT"
 }

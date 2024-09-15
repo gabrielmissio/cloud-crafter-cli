@@ -9,9 +9,5 @@
     "deploy": "serverless deploy --verbose"
   },
   "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "serverless": "^3.35.2",
-    "serverless-offline": "^13.1.1"
-  }
+  "license": "MIT"
 }

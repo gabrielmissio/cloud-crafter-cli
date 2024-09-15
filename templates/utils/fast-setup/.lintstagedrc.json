@@ -1,0 +1,4 @@
+{
+    "*.js": "npm run lint -- --fix",
+    "*.mjs": "npm run lint -- --fix"
+}

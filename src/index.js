@@ -25,6 +25,12 @@ program
     downloadTemplate(templateName, newProjectDir)
       .then(() => {
         if (templateName.startsWith('serverless/') || templateName.startsWith('utils/')) {
+          // TODO: refactor to choose based on template type
+          if (templateName.startsWith('serverless/') && templateName.includes('sqs')) {
+            console.log('Project created successfully!')
+            return // No need to install dependencies
+          }
+
           const rl = Readline.createInterface({
             input: process.stdin,
             output: process.stdout
