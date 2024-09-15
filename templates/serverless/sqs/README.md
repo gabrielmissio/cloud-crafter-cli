@@ -9,7 +9,7 @@
 
 ## Overview
 
-![serverless-sqs-Page-2 drawio](https://github.com/user-attachments/assets/4eb72d7d-5296-4907-8d41-29c4bce4dbce)
+![overview-diagram](overview.drawio.png)
 
 ## Set Envs
 
