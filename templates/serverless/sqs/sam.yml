@@ -1,0 +1,217 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  AppName:
+    Type: String
+    Default: "MyServerlessApp"
+    Description: "The name of the application"
+  StageName:
+    Type: String
+    Default: "dev"
+    Description: "The name of the API stage"
+
+Resources:
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+        AllowHeaders: ['Content-Type', 'Authorization']
+        AllowOrigins: ['*']
+      StageName: !Ref StageName
+
+  MainQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AppName}-MainQueue-${StageName}
+      VisibilityTimeout: 30
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt ErrorQueue.Arn
+        maxReceiveCount: 3
+
+  ErrorQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AppName}-ErrorQueue-${StageName}
+      VisibilityTimeout: 30
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 3
+
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${AppName}-DeadLetterQueue-${StageName}
+
+  AlertsSNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${AppName}-AlertTopic-${StageName}
+      DisplayName: !Sub ${AppName}-AlertTopic-${StageName}
+
+  MainQueueProducerLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs18.x
+      CodeUri: ./main-queue-producer/src
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          STAGE: !Ref StageName
+          APP_NAME: !Ref AppName
+          MAIN_QUEUE_URL: !GetAtt MainQueue.QueueUrl
+          ERROR_QUEUE_URL: !GetAtt ErrorQueue.QueueUrl
+          DEAD_LETTER_QUEUE_URL: !GetAtt DeadLetterQueue.QueueUrl
+          ALERT_TOPIC_ARN: !GetAtt AlertsSNSTopic.TopicArn
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: 
+                - "sqs:SendMessage"
+              Resource:
+                - !GetAtt MainQueue.Arn
+                - !GetAtt ErrorQueue.Arn
+                - !GetAtt DeadLetterQueue.Arn
+      Events:
+        ApiEvent:
+          Type: HttpApi
+          Properties:
+            Path: /queue-producer
+            Method: POST
+            ApiId: !Ref HttpApi
+
+  MainQueueConsumerLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs18.x
+      CodeUri: ./main-queue-consumer/src
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          STAGE: !Ref StageName
+          APP_NAME: !Ref AppName
+          ERROR_QUEUE_URL: !GetAtt ErrorQueue.QueueUrl
+          DEAD_LETTER_QUEUE_URL: !GetAtt DeadLetterQueue.QueueUrl
+          ALERT_TOPIC_ARN: !GetAtt AlertsSNSTopic.TopicArn
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: 
+                - "sqs:SendMessage"
+              Resource:
+                - !GetAtt ErrorQueue.Arn
+                - !GetAtt DeadLetterQueue.Arn
+            - Effect: Allow
+              Action:
+                - "sns:Publish"
+              Resource:
+                - !GetAtt AlertsSNSTopic.TopicArn
+      Events:
+        QueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt MainQueue.Arn
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+            ScalingConfig:
+              MaximumConcurrency: 2
+
+  ErrorQueueConsumerLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs18.x
+      CodeUri: ./error-queue-consumer/src
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          STAGE: !Ref StageName
+          APP_NAME: !Ref AppName
+          DEAD_LETTER_QUEUE_URL: !GetAtt DeadLetterQueue.QueueUrl
+          ALERT_TOPIC_ARN: !GetAtt AlertsSNSTopic.TopicArn
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - "sqs:SendMessage"
+              Resource:
+                - !GetAtt DeadLetterQueue.Arn
+            - Effect: Allow
+              Action:
+                - "sns:Publish"
+              Resource:
+                - !GetAtt AlertsSNSTopic.TopicArn
+      Events:
+        QueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt ErrorQueue.Arn
+            FunctionResponseTypes:
+              - ReportBatchItemFailures
+            ScalingConfig:
+              MaximumConcurrency: 2
+
+  AlertTopicConsumerLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: index.handler
+      Runtime: nodejs18.x
+      CodeUri: ./alert-topic-consumer/src
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          STAGE: !Ref StageName
+          APP_NAME: !Ref AppName
+      Policies:
+        - AWSLambdaBasicExecutionRole
+      Events:
+        QueueEvent:
+          Type: SNS
+          Properties:
+            Topic: !GetAtt AlertsSNSTopic.TopicArn
+
+  # TODO: Add ErrorQueue and DeadLetterQueue alarms
+
+Outputs:
+  ApiGatewayInvokeURL:
+    Description: "Invoke URL for the API Gateway"
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}'
+    Export:
+      Name: !Sub '${AppName}-ApiGatewayInvokeURL-${StageName}'
+
+  MainQueueProducerLambdaFunctionArn:
+    Description: "ARN of the deployed Lambda function"
+    Value: !GetAtt MainQueueProducerLambdaFunction.Arn
+    Export:
+      Name: !Sub '${AppName}-MainQueueProducerLambdaFunctionArn-${StageName}'
+
+  MainQueueConsumerLambdaFunctionArn:
+    Description: "ARN of the deployed Lambda function"
+    Value: !GetAtt MainQueueConsumerLambdaFunction.Arn
+    Export:
+      Name: !Sub '${AppName}-MainQueueConsumerLambdaFunctionArn-${StageName}'
+
+  ErrorQueueConsumerLambdaFunctionArn:
+    Description: "ARN of the deployed Lambda function"
+    Value: !GetAtt ErrorQueueConsumerLambdaFunction.Arn
+    Export:
+      Name: !Sub '${AppName}-ErrorQueueConsumerLambdaFunctionArn-${StageName}'
+
+  AlertTopicConsumerLambdaFunctionArn:
+    Description: "ARN of the deployed Lambda function"
+    Value: !GetAtt AlertTopicConsumerLambdaFunction.Arn
+    Export:
+      Name: !Sub '${AppName}-AlertTopicConsumerLambdaFunctionArn-${StageName}'

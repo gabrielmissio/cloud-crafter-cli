@@ -38,6 +38,10 @@ ccc create serverless/http my-new-project
 
 ## Available Templates
 
+### AWS SAM
+
+- serverless/sqs  (Standard Queues)
+
 ### Serverless Framework
 
 - serverless/http (API Gateway V2)
