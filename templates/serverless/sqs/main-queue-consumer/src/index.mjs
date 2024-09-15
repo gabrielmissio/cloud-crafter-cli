@@ -1,6 +1,7 @@
 import { sendMessage } from "./infra/queue-api.mjs"
 import { batchFailureAlert } from "./infra/notification-api.mjs"
-import { PartialBatchFailureError } from "./errors/partial-batch-failure-error.mjs"
+import { NonRetryableError } from "./errors/non-retryable-error.mjs"
+import { RetryableError } from "./errors/retryable-error.mjs"
 
 export async function handler(event, context) {
     try {
@@ -8,11 +9,13 @@ export async function handler(event, context) {
         const results = await Promise.allSettled(recordPromises)
         console.info("index", "handler", JSON.stringify(results))
 
-        const batchItemFailures = results
+        const batchFailures = results
             .filter(result => result.status === "rejected")
+        const retryableBatchFailures = batchFailures 
+            .filter(result => result.reason instanceof RetryableError)
             .map(result => ({ itemIdentifier: result.status === "rejected" ? result.reason.messageId : undefined }))
 
-        if (batchItemFailures.length > 0) {
+        if (batchFailures.length > 0) {
             const batchFailureAlertResult = await batchFailureAlert({
                 context,
                 totalRecords: event.Records.length,
@@ -21,7 +24,7 @@ export async function handler(event, context) {
             console.info("index", "handler", { batchFailureAlertResult })
         }
 
-        const result = { batchItemFailures }
+        const result = { batchItemFailures: retryableBatchFailures }
         console.info("index", "handler", JSON.stringify(result))
 
         return result
@@ -43,21 +46,23 @@ async function recordHandler(record) {
             SUCCESS: 'Success'
         }
 
+        console.log("index", "recordHandler", body)
+
         switch (body.type) {           
             case options.SUCCESS:
                 return true
             case options.FATAL_ERROR:
                 await sendToDlq(record)
-                return true        
+                throw new NonRetryableError(record.messageId, "Any Fatal Error")
             case options.RETRYABLE_ERROR:
-                throw new Error("Any Retryable Error")
+                throw new RetryableError(record.messageId, "Any Retryable Error")
             case options.NON_RETRYABLE_ERROR:
                 await sendToErrorQueue(record)
-                return true // centralize error handling
+                throw new NonRetryableError(record.messageId, "Any Fatal Error")
             default:
                 // treat as invalid record / change based on your use case
                 await sendToDlq(record)
-                return true
+                throw new RetryableError(record.messageId, "Unknow Error")
         }
     } catch (error) {
         console.error("index", "recordHandler", error.message, error.stack, error.payload)
@@ -80,7 +85,7 @@ async function sendToErrorQueue(record) {
         })
     } catch (error) {
         console.error("index", "sendToErrorQueue", error.message, error.stack, error.payload)
-        throw new PartialBatchFailureError(record.messageId, error)
+        throw new RetryableError(record.messageId, error)
     }
 }
 
