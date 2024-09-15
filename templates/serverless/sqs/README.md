@@ -1,9 +1,15 @@
 # Serverless SQS Demo
 
+## Pre-Requisites
+
+ - [Docker](https://www.docker.com/)
  - [Node.js](https://nodejs.org/en)
  - [AWS CLI](https://docs.aws.amazon.com/pt_br/cli/latest/userguide/getting-started-install.html)
  - [AWS SAM](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
 
+## Overview
+
+![serverless-sqs-Page-2 drawio](https://github.com/user-attachments/assets/4eb72d7d-5296-4907-8d41-29c4bce4dbce)
 
 ## Set Envs
 
@@ -57,12 +63,6 @@ sam local invoke ErrorQueueConsumerLambdaFunction \
 ```
 
 ## Deploy
-
-```bash
-sam package --template-file sam.yml \
-    --s3-bucket ${DEPLOYMENT_BUCKET_NAME} \
-    --s3-prefix sam/${APP_NAME}/${STAGE}/sam-package
-```
 
 ```bash
 sam deploy --template-file sam.yml \
