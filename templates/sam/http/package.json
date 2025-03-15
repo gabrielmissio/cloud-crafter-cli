@@ -1,0 +1,13 @@
+{
+  "name": "sam-http-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/handler.js",
+  "scripts": {
+    "start": "sam local start-api",
+    "predeploy1": "npm i --omit=dev && npm prune --omit=dev && sam package --resolve-s3",
+    "deploy": "sam deploy"
+  },
+  "author": "",
+  "license": "MIT"
+}
