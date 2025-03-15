@@ -1,6 +1,7 @@
 const ALLOWED_TEMPLATES = [
+  'sam/sqs',
+  'sam/http',
   'serverless/s3',
-  'serverless/sqs',
   'serverless/http',
   'serverless/rest',
   'cloudformation/dynamodb-table',

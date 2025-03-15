@@ -40,7 +40,8 @@ ccc create serverless/http my-new-project
 
 ### AWS SAM
 
-- serverless/sqs  (Standard Queues)
+- sam/sqs  (Standard Queues)
+- sam/http (API Gateway V2)
 
 ### Serverless Framework
 
