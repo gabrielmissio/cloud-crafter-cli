@@ -1,10 +1,10 @@
-let doesLambdaWarmup = false
+let isLambdaWarmupController = false
 
 exports.handler = async (event, context) => {
-  const warmup = doesLambdaWarmup
+  const isLambdaWarmup = isLambdaWarmupController
 
-  if (!doesLambdaWarmup) {
-    doesLambdaWarmup = true
+  if (!isLambdaWarmup) {
+    isLambdaWarmupController = true
   }
 
   return {
@@ -14,7 +14,7 @@ exports.handler = async (event, context) => {
     },
     body: JSON.stringify({
       success: true,
-      warmup,
+      warmup: isLambdaWarmup,
       env: {
         stage: process.env.STAGE,
         appName: process.env.APP_NAME

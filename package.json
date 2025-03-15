@@ -1,6 +1,6 @@
 {
   "name": "cloud-crafter-cli",
-  "version": "1.2.0-beta.5",
+  "version": "1.0.0",
   "description": "CloudCrafter CLI is a command-line interface tool that provides templates for common cloud resources to help you get started quickly.",
   "main": "src/index.js",
   "bin": {
