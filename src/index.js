@@ -60,6 +60,22 @@ program
       })
   })
 
+program
+  .command('run <scriptName>')
+  .description('Run a script in the project')
+  .action((scriptName) => {
+    const scriptHandlers = {
+      'quickstart-js': require('../templates/setup-scripts/quickstart-js')
+    }
+
+    if (!scriptHandlers[scriptName]) {
+      console.error(`Unknown script "${scriptName}". Available scripts: ${Object.keys(scriptHandlers).join(', ')}`)
+      process.exit(1)
+    }
+
+    scriptHandlers[scriptName]()
+  })
+
 program.on('command:*', () => {
   console.error('Invalid command: %s', program.args.join(' '))
   process.exit(1)

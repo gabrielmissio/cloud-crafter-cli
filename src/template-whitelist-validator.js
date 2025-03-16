@@ -8,7 +8,6 @@ const ALLOWED_TEMPLATES = [
   'cloudformation/s3-public-read',
   'cloudformation/s3-static-website',
   'cloudformation/s3-static-website-v2',
-  'utils/fast-setup',
   'utils/openai'
 ]
 
