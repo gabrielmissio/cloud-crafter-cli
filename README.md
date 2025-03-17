@@ -62,8 +62,9 @@ ccc run quickstart-js
 
 ### AWS SAM
 
-- sam/sqs  (Standard Queues)
-- sam/http (API Gateway V2)
+- sam/sqs           (Standard Queues)
+- sam/http          (API Gateway V2)
+- sam/http-express  (API Gateway V2 + express setup)
 
 ### Serverless Framework
 
@@ -76,6 +77,7 @@ ccc run quickstart-js
 - cloudformation/dynamodb-table
 - cloudformation/s3-public-read
 - cloudformation/s3-static-website
+- cloudformation/s3-static-website-v2
 
 ### Utils
 

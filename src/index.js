@@ -37,10 +37,10 @@ program
           })
 
           // Prompt the user to confirm running npm install
-          rl.question('Do you want to install dependencies? (y/n) ', (answer) => {
+          rl.question('Do you want to install dependencies? (Y/n) ', (answer) => {
             rl.close()
-            if (answer === 'y' || answer === 'Y') {
-              const npmInstall = exec('npm install', { cwd: newProjectDir })
+            if (answer === 'y' || answer === 'Y' || answer === '') {
+              const npmInstall = exec('npm install && npm audit fix', { cwd: newProjectDir })
               npmInstall.stdout.pipe(process.stdout)
 
               npmInstall.on('close', () => {

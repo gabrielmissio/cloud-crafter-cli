@@ -1,0 +1,17 @@
+{
+  "name": "sam-http-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/handler.js",
+  "scripts": {
+    "start": "sam local start-api",
+    "predeploy": "sam build",
+    "deploy": "sam deploy"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "serverless-http": "^3.2.0"
+  }
+}
