@@ -6,7 +6,8 @@
   "scripts": {
     "start": "sam local start-api",
     "predeploy1": "npm i --omit=dev && npm prune --omit=dev && sam package --resolve-s3",
-    "deploy": "sam deploy"
+    "deploy": "sam deploy",
+    "destroy": "sam delete"
   },
   "author": "",
   "license": "MIT"

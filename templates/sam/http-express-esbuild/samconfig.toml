@@ -3,7 +3,7 @@ version = 0.1
 [default]
 [default.global]
 [default.global.parameters]
-stack_name = "sam-lambda-unbundled"
+stack_name = "sam-lambda-bundled"
 
 [default.build.parameters]
 cached = true

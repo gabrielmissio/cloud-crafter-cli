@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  AppName:
+    Type: String
+    Default: "sam-http-express-demo-esbuild"
+    Description: "The name of the application"
+  StageName:
+    Type: String
+    Default: "dev"
+    Description: "The name of the stage/environment"
+
+Resources:
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      # CorsConfiguration:
+      #   AllowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+      #   AllowHeaders: ['Content-Type']
+      #   AllowOrigins: ['*']
+      StageName: !Ref StageName
+
+  MyLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/index.handler
+      Runtime: nodejs20.x
+      CodeUri: ./ # root directory
+      MemorySize: 128
+      Timeout: 25
+      # VpcConfig:
+      #   SecurityGroupIds: 
+      #     - !ImportValue 
+      #       'Fn::Sub': '${AppName}-SecurityGroupId'
+      #   SubnetIds: !Split
+      #     - ","
+      #     - !ImportValue
+      #       'Fn::Sub': '${AppName}-PrivateSubnetIds'
+      Environment:
+        Variables:
+          STAGE: !Ref StageName
+          APP_NAME: !Ref AppName
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        # - Version: '2012-10-17'
+        #   Statement:
+        #     - Effect: Allow
+        #       Action: 
+        #         - "secretsmanager:GetSecretValue"
+        #       Resource: !ImportValue 
+        #         'Fn::Sub': '${AppName}-DocumentDBSecretArn'
+      Events:
+        ApiEventMyLambdaProxy:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            ApiId: !Ref HttpApi
+    Metadata:
+      BuildMethod: makefile
+
+Outputs:
+  ApiGatewayAdminInvokeURL:
+    Description: "Invoke URL for the API Gateway"
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/health-check'
+    Export:
+      Name: !Sub '${AppName}-ApiGatewayAdminInvokeURL-${StageName}'
+
+  MyLambdaFunctionArn:
+    Description: "ARN of the deployed Lambda function"
+    Value: !GetAtt MyLambdaFunction.Arn
+    Export:
+      Name: !Sub '${AppName}-MyLambdaFunctionArn-${StageName}'

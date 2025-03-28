@@ -7,12 +7,16 @@
     "start": "sam local start-api",
     "predeploy": "sam build",
     "deploy": "sam deploy",
-    "destroy": "sam delete"
+    "destroy": "sam delete",
+    "build": "node esbuild.config.mjs"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
     "express": "^4.21.2",
     "serverless-http": "^3.2.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.1"
   }
 }
