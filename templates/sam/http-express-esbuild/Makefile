@@ -13,8 +13,8 @@ build-MyLambdaFunction:
 	# Run the build script via NPM
 	npm run build
 
-	# Copy built file to artifacts dir
-	cp dist/index.js $(ARTIFACTS_DIR)/index.js
+	# Copy built file to artifacts dir (and source map)
+	cp dist/index.js dist/index.js.map $(ARTIFACTS_DIR)/
 
 clean-MyLambdaFunction:
 	rm -rf $(ARTIFACTS_DIR)
