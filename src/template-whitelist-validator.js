@@ -2,6 +2,7 @@ const ALLOWED_TEMPLATES = [
   'sam/sqs',
   'sam/http',
   'sam/http-express',
+  'sam/http-express-esbuild',
   'serverless/s3',
   'serverless/http',
   'serverless/rest',

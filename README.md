@@ -62,9 +62,10 @@ ccc run quickstart-js
 
 ### AWS SAM
 
-- sam/sqs           (Standard Queues)
-- sam/http          (API Gateway V2)
-- sam/http-express  (API Gateway V2 + express setup)
+- sam/sqs                   (Standard Queues)
+- sam/http                  (API Gateway V2)
+- sam/http-express          (API Gateway V2 + express setup)
+- sam/http-express-esbuild  (API Gateway V2 + express + esbuild setup)
 
 ### Serverless Framework
 
