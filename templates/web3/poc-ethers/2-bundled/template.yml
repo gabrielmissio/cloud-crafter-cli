@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  AppName:
+    Type: String
+    Default: "poc-ethers-bundled"
+    Description: "The name of the application"
+  StageName:
+    Type: String
+    Default: "dev"
+    Description: "The name of the stage/environment"
+  JsonRPCUrl:
+    Type: String
+    # Default: "https://eth.llamarpc.com"         # Mainnet
+    Default: "https://sepolia.drpc.org"           # Sepolia testnet
+    # Default: "http://172.17.0.1:8545"           # Localhost node (linux)
+    # Default: "http://host.docker.internal:8545" # Localhost node (macOS & Windows)
+    Description: "The URL of the JSON-RPC endpoint for the EVM based blockchain network"
+
+Resources:
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      # CorsConfiguration:
+      #   AllowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
+      #   AllowHeaders: ['Content-Type']
+      #   AllowOrigins: ['*']
+      StageName: !Ref StageName
+
+  MyLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/index.handler
+      Runtime: nodejs20.x
+      CodeUri: ./ # root directory
+      MemorySize: 128
+      Timeout: 25
+      # VpcConfig:
+      #   SecurityGroupIds: 
+      #     - !ImportValue 
+      #       'Fn::Sub': '${AppName}-SecurityGroupId'
+      #   SubnetIds: !Split
+      #     - ","
+      #     - !ImportValue
+      #       'Fn::Sub': '${AppName}-PrivateSubnetIds'
+      Environment:
+        Variables:
+          STAGE: !Ref StageName
+          APP_NAME: !Ref AppName
+          JSON_RPC_URL: !Ref JsonRPCUrl
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        # - Version: '2012-10-17'
+        #   Statement:
+        #     - Effect: Allow
+        #       Action: 
+        #         - "secretsmanager:GetSecretValue"
+        #       Resource: !ImportValue 
+        #         'Fn::Sub': '${AppName}-DocumentDBSecretArn'
+      Events:
+        ApiEventMyLambdaProxy:
+          Type: HttpApi
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            ApiId: !Ref HttpApi
+    Metadata:
+      BuildMethod: makefile
+
+Outputs:
+  ApiGatewayInvokeURL:
+    Description: "Invoke URL for the API Gateway"
+    Value: !Sub 'https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${StageName}/health-check'
+    Export:
+      Name: !Sub '${AppName}-ApiGatewayInvokeURL-${StageName}'
+
+  MyLambdaFunctionArn:
+    Description: "ARN of the deployed Lambda function"
+    Value: !GetAtt MyLambdaFunction.Arn
+    Export:
+      Name: !Sub '${AppName}-MyLambdaFunctionArn-${StageName}'

@@ -1,0 +1,22 @@
+{
+  "name": "sam-http-demo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/handler.js",
+  "scripts": {
+    "start": "sam local start-api",
+    "predeploy": "sam build",
+    "deploy": "sam deploy",
+    "destroy": "sam delete",
+    "build": "node esbuild.config.mjs"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ethers": "^6.13.5",
+    "source-map-support": "^0.5.21"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.1"
+  }
+}
