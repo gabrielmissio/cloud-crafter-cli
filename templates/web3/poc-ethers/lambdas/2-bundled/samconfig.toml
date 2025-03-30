@@ -3,15 +3,16 @@ version = 0.1
 [default]
 [default.global]
 [default.global.parameters]
-stack_name = "poc-ethers-bundled-minified"
+stack_name = "poc-ethers-bundled"
 
 [default.build.parameters]
 cached = true
 parallel = true
 
 [default.deploy.parameters]
+fail_on_empty_changeset = false
+confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
-confirm_changeset = true
 resolve_s3 = true
 
 [default.sync.parameters]

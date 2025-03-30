@@ -4,7 +4,7 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   AppName:
     Type: String
-    Default: "poc-ethers-bundled"
+    Default: "poc-ethers-bundled-minified"
     Description: "The name of the application"
   StageName:
     Type: String
@@ -28,8 +28,8 @@ Resources:
     Properties:
       StageName: !Ref StageName
       DefaultRouteSettings:
-        ThrottlingRateLimit: 200
-        ThrottlingBurstLimit: 200
+        ThrottlingRateLimit: 500
+        ThrottlingBurstLimit: 500
 
   MyLambdaFunction:
     Type: AWS::Serverless::Function

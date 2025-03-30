@@ -108,3 +108,48 @@ Docker on Linux does **not** support `host.docker.internal` by default. Use the 
    ```bash
    http://172.17.0.1:8545
    ```
+
+---
+
+## 📈 Benchmark Results
+
+We performed a performance benchmark comparing the different Lambda packaging strategies used in this project:
+
+- Unbundled (raw source + node_modules)
+- Bundled (with `esbuild`)
+- Bundled and minified (with `esbuild`)
+
+The results include average execution time, memory usage, tail latency (p95/p99), and analysis across 50,000+ invocations per function.
+
+👉 [See full benchmark results here](./docs/BENCHMARK.md)
+
+---
+
+## 🚀 Deploying and Removing All Lambda Variants
+
+This project includes three Lambda versions under the `lambdas/` folder:
+- `1-unbundled`
+- `2-bundled`
+- `3-bundled-minified`
+
+To **deploy all stacks at once**, run the following script from the project root:
+
+```bash
+bash scripts/deploy-all.sh
+```
+To remove all stacks and clean up resources, run:
+
+```bash
+bash scripts/destroy-all.sh
+```
+> ℹ️ These scripts will also validate required tools like sam, npm and make.
+
+---
+
+## 📂 Additional Resources
+
+You can find extra materials used in this POC under the docs/ folder:
+
+- 📊[BENCHMARK.md](./docs/BENCHMARK.md) — full performance results comparing all Lambda strategies
+- 🔍[cloudwatch-insights-query.txt](./docs/cloudwatch-insights-query.txt) — ready-to-use CloudWatch Logs Insights query
+- 🧪[POC Ethers Esbuild.jmx](./docs/POC%20Ethers%20Esbuild.jmx) — JMeter test file used for load testing (50k+ invocations)

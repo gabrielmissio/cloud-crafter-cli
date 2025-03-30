@@ -4,7 +4,7 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   AppName:
     Type: String
-    Default: "poc-ethers-bundled-minified"
+    Default: "poc-ethers-umbundled"
     Description: "The name of the application"
   StageName:
     Type: String
@@ -28,8 +28,8 @@ Resources:
     Properties:
       StageName: !Ref StageName
       DefaultRouteSettings:
-        ThrottlingRateLimit: 200
-        ThrottlingBurstLimit: 200
+        ThrottlingRateLimit: 500
+        ThrottlingBurstLimit: 500
 
   MyLambdaFunction:
     Type: AWS::Serverless::Function
@@ -39,6 +39,7 @@ Resources:
       CodeUri: ./ # root directory
       MemorySize: 128
       Timeout: 25
+      # Tracing: Active
       Layers:
         - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:${LambdaInsightsLayerVersion}
       Environment:

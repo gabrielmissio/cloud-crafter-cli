@@ -5,6 +5,8 @@ fields @log, @message
     avg(duration) as avgDuration,
     max(duration) as maxDuration,
     min(duration) as minDuration,
+    pct(duration, 95) as p95,
+    pct(duration, 99) as p99,
     avg(memory) as avgMemory,
     count() as totalInvocations
   by @log
