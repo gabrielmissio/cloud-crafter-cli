@@ -6,7 +6,8 @@
   "scripts": {
     "start": "sam local start-api",
     "predeploy": "sam build",
-    "deploy": "sam deploy"
+    "deploy": "sam deploy",
+    "destroy": "sam delete"
   },
   "author": "",
   "license": "MIT",

@@ -17,16 +17,19 @@ Parameters:
     # Default: "http://172.17.0.1:8545"           # Localhost node (linux)
     # Default: "http://host.docker.internal:8545" # Localhost node (macOS & Windows)
     Description: "The URL of the JSON-RPC endpoint for the EVM based blockchain network"
+  LambdaInsightsLayerVersion:
+    Type: String
+    Default: "55" # Update this manually when needed
+    Description: "The version of the Lambda Insights layer"
 
 Resources:
   HttpApi:
     Type: AWS::Serverless::HttpApi
     Properties:
-      # CorsConfiguration:
-      #   AllowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
-      #   AllowHeaders: ['Content-Type']
-      #   AllowOrigins: ['*']
       StageName: !Ref StageName
+      DefaultRouteSettings:
+        ThrottlingRateLimit: 200
+        ThrottlingBurstLimit: 200
 
   MyLambdaFunction:
     Type: AWS::Serverless::Function
@@ -36,14 +39,9 @@ Resources:
       CodeUri: ./ # root directory
       MemorySize: 128
       Timeout: 25
-      # VpcConfig:
-      #   SecurityGroupIds: 
-      #     - !ImportValue 
-      #       'Fn::Sub': '${AppName}-SecurityGroupId'
-      #   SubnetIds: !Split
-      #     - ","
-      #     - !ImportValue
-      #       'Fn::Sub': '${AppName}-PrivateSubnetIds'
+      # Tracing: Active
+      Layers:
+        - !Sub arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:${LambdaInsightsLayerVersion}
       Environment:
         Variables:
           STAGE: !Ref StageName
@@ -51,13 +49,6 @@ Resources:
           JSON_RPC_URL: !Ref JsonRPCUrl
       Policies:
         - AWSLambdaBasicExecutionRole
-        # - Version: '2012-10-17'
-        #   Statement:
-        #     - Effect: Allow
-        #       Action: 
-        #         - "secretsmanager:GetSecretValue"
-        #       Resource: !ImportValue 
-        #         'Fn::Sub': '${AppName}-DocumentDBSecretArn'
       Events:
         ApiEventMyLambdaProxy:
           Type: HttpApi
