@@ -1,0 +1,10 @@
+fields @log, @message
+| filter @message like /REPORT/
+| parse @message /^REPORT.*Duration: (?<duration>[\d.]+) ms.*Max Memory Used: (?<memory>\d+) MB/
+| stats
+    avg(duration) as avgDuration,
+    max(duration) as maxDuration,
+    min(duration) as minDuration,
+    avg(memory) as avgMemory,
+    count() as totalInvocations
+  by @log
